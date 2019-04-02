@@ -21,7 +21,7 @@ By using the extension, you are able to disable the author pages either complete
 
 ## Installation
 
- - put the plugin's folder 'wp-author-plugin' into the Wordpress plugin folder 'wp-content/plugins/'
+ - put the plugin's folder 'wp-author-security' into the Wordpress plugin folder 'wp-content/plugins/' (e.g. via ftp)
  - activate the plugin in the Wordpress backend
  - customize the settings by navigation to Settings -> WP Author Security
 
