@@ -1,0 +1,103 @@
+<?php
+/**
+ * Plugin Name: WP Author Security
+ * Description: Protects against user enumeration attacks for author pages. By default, Wordpress will display some sensitive information on author pages. The author page is typically called by requesting the URI https://yourdomain.com/?author=&lt;id&gt; or with permalinks https://yourdomain.com/author/&lt;username&gt;. The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. In some cases, it is not wanted to expose this information to the public. An attacker is able to brute-force valid IDs or valid username. This information might be used for further attacks like social-engineering attacks or login brute-force attacks with gathered usernames. By using the extension, you are able to disable the author pages either completely or only for users that do not have any published posts yet. When the page is disabled the default 404 page not found is displayed.
+ * Author: mgm-sp
+ * Author URI: https://www.mgm-sp.com
+ * Version: 1.0
+ * License: GPL3
+ * Plugin URI: https://github.com/mgm-sp/wp-author-security
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+require_once (dirname( __FILE__ ) . '/options.php');
+
+add_action( 'template_redirect', 'check_author_request', 1 );
+
+/**
+ * checks for author parameter in requests and decideds wheter to block request (404) 
+ * or allow to display the requested author profile
+ */
+function check_author_request() {
+
+    $field = '';
+    $value = '';
+    $author = get_query_var('author', false);
+    $authorName = get_query_var('author_name', false);
+
+    
+    // matches requests to "/author/<username>"
+    if ( $authorName && get_option( 'protectAuthorName' ) != AuthorSettingsEnum::DISABLED ) {
+        $field = 'login';
+        $value = trim($authorName);
+        // matches requests to "?author=<id>"
+    } else if ( $author && get_option( 'protectAuthor' ) != AuthorSettingsEnum::DISABLED ) {
+        $field = 'id';
+        $value = intval($author);        
+    } else {
+        return;
+    }
+    
+    // check if protection is disabled for logged in user
+    if( is_user_logged_in() && get_option('disableLoggedIn')) {
+        return;
+    }
+
+    // load user and check if user exists
+    $user = get_user_by( $field, $value );
+    if( ! $user ) {
+        return;
+    }
+
+    $disable = ( $field == 'id' ? isProtected( get_option( 'protectAuthor' ), $user ) : isProtected( get_option( 'protectAuthorName' ), $user ) );
+    
+    // when protection is enabled display 404
+    if( $disable ) {
+        display_404();  
+    }
+
+    return;    
+}
+/**
+ * Checks if requested user should be blocked or not
+ */
+function isProtected($option, $user) {
+    // if option is set to block only users without any posts
+    if ( $option ==  AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS ) {
+        if ( count_user_posts( $user->id )  == 0  ) {
+            return true;
+        }
+        // or if all users shall be blocked
+    } else if ( $option ==  AuthorSettingsEnum::COMPLETE ){
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Display the 404 page not found site
+ */
+function display_404() {
+    global $wp_query;
+    $template = null;
+
+    status_header( 404 );
+    if ( isset( $wp_query ) && is_object( $wp_query ) ) {
+        $wp_query->set_404();
+    }
+    // display default 404 page
+    $template = get_404_template();
+    if ( $template && @file_exists( $template ) ) {
+        include( $template );
+        exit;
+    }
+    // fallback when no 404 page was found
+    header( 'HTTP/1.0 404 Not Found', true, 404 );
+    echo '<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>';
+    exit;
+}
+
