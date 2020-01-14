@@ -9,9 +9,13 @@ By default, Wordpress will display some sensitive information on author pages. T
 
      https://yourdomain.com/?author=id
 
- or with permalinks 
+ with permalinks 
 
      https://yourdomain.com/author/username
+
+or using REST API
+
+     https://yourdomain.com/wp-json/wp/v2/users
 
 The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. 
 

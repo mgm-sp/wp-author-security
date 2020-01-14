@@ -37,14 +37,22 @@ function register_wp_author_security_settings() {
         'sanitize_callback' => 'sanitize_checkbox',                                                                                    
         'default' => false                                             
     );
+    $argsRestUser = array(                                     
+        'description' => 'Whether to protect REST API endpoint wp-json/wp/v2/users.',                                          
+        'type' => 'booelan',                                      
+        'sanitize_callback' => 'sanitize_checkbox',                                                                                    
+        'default' => true                                             
+    );
 
     register_setting( 'wp-author-security-group', 'protectAuthor', array_merge($argsBase, $argsAuthor) );
     register_setting( 'wp-author-security-group', 'protectAuthorName', array_merge($argsBase, $argsAuthorName) );
     register_setting( 'wp-author-security-group', 'disableLoggedIn', array_merge($argsBase, $argsLoggedIn) );
+    register_setting( 'wp-author-security-group', 'disableRestUser', array_merge($argsBase, $argsRestUser) );
 
     add_option( 'protectAuthor',  $argsAuthor['default']); 
     add_option( 'protectAuthorName',  $argsAuthorName['default']);
     add_option( 'disableLoggedIn',  $argsLoggedIn['default']);
+    add_option( 'disableRestUser',  $argsLoggedIn['default']);
 };
 
 function wp_author_security_menu() {
@@ -127,6 +135,14 @@ function wp_author_security_options_page() {
         <td>
             <input type="checkbox" name="disableLoggedIn"<?php if ( get_option('disableLoggedIn') )  echo ' checked="checked"'; ?> />
             <p>Disable protection for logged in users.</p>
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">Protect REST API user enumeration</th>
+        <td>
+            <input type="checkbox" name="disableRestUser"<?php if ( get_option('disableRestUser') )  echo ' checked="checked"'; ?> />
+            <p>Disable REST API endpoint wp-json/wp/v2/users.</p>
         </td>
         </tr>
     </table>

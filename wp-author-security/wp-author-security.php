@@ -4,7 +4,7 @@
  * Description: Protects against user enumeration attacks for author pages. By default, Wordpress will display some sensitive information on author pages. The author page is typically called by requesting the URI https://yourdomain.com/?author=&lt;id&gt; or with permalinks https://yourdomain.com/author/&lt;username&gt;. The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. In some cases, it is not wanted to expose this information to the public. An attacker is able to brute-force valid IDs or valid username. This information might be used for further attacks like social-engineering attacks or login brute-force attacks with gathered usernames. By using the extension, you are able to disable the author pages either completely or only for users that do not have any published posts yet. When the page is disabled the default 404 page not found is displayed.
  * Author: mgm-sp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.0
+ * Version: 1.1.0
  * License: GPL3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once (dirname( __FILE__ ) . '/options.php');
 
 add_action( 'template_redirect', 'check_author_request', 1 );
+add_action( 'rest_api_init', 'check_rest_api', 10);
 
 /**
  * checks for author parameter in requests and decideds wheter to block request (404) 
@@ -42,8 +43,7 @@ function check_author_request() {
         return;
     }
     
-    // check if protection is disabled for logged in user
-    if( is_user_logged_in() && get_option('disableLoggedIn')) {
+    if(!isEnabled()) {
         return;
     }
 
@@ -62,6 +62,26 @@ function check_author_request() {
 
     return;    
 }
+
+/**
+ * disables user enumeration for the REST API endpoint wp-json/wp/v2/users
+ */
+function check_rest_api()
+{
+    // check if protection is disabled for logged in user
+    if( is_user_logged_in() && get_option('disableLoggedIn')) {
+        return;
+    }
+    $pattern = '/wp\/v2\/users/';
+    $restRoute = $_REQUEST['rest_route'];
+    if(isset($_REQUEST['rest_route']) && preg_match($pattern, $_REQUEST['rest_route']) ) {
+        if(get_option( 'disableRestUser' )) {
+            display_404();
+        }        
+    }    
+    return;
+} 
+
 /**
  * Checks if requested user should be blocked or not
  */
@@ -99,5 +119,16 @@ function display_404() {
     header( 'HTTP/1.0 404 Not Found', true, 404 );
     echo '<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>';
     exit;
+}
+
+/**
+ * checks whether plugin is enabled for logged in users or not
+ */
+function isEnabled() {
+    // check if protection is disabled for logged in user
+    if( is_user_logged_in() && get_option('disableLoggedIn')) {
+        return false;
+    }
+    return true;
 }
 
