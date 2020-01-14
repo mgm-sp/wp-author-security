@@ -52,7 +52,7 @@ function register_wp_author_security_settings() {
     add_option( 'protectAuthor',  $argsAuthor['default']); 
     add_option( 'protectAuthorName',  $argsAuthorName['default']);
     add_option( 'disableLoggedIn',  $argsLoggedIn['default']);
-    add_option( 'disableRestUser',  $argsLoggedIn['default']);
+    add_option( 'disableRestUser',  $argsRestUser['default']);
 };
 
 function wp_author_security_menu() {
