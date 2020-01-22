@@ -4,7 +4,7 @@
  * Description: Protects against user enumeration attacks for author pages. By default, Wordpress will display some sensitive information on author pages. The author page is typically called by requesting the URI https://yourdomain.com/?author=&lt;id&gt; or with permalinks https://yourdomain.com/author/&lt;username&gt;. The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. In some cases, it is not wanted to expose this information to the public. An attacker is able to brute-force valid IDs or valid username. This information might be used for further attacks like social-engineering attacks or login brute-force attacks with gathered usernames. By using the extension, you are able to disable the author pages either completely or only for users that do not have any published posts yet. When the page is disabled the default 404 page not found is displayed.
  * Author: mgm-sp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.1.0
+ * Version: 1.1.1
  * License: GPL3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
@@ -68,13 +68,13 @@ function check_author_request() {
  */
 function check_rest_api()
 {
-    // check if protection is disabled for logged in user
-    if( is_user_logged_in() && get_option('disableLoggedIn')) {
+    if(!isEnabled()) {
         return;
     }
-    $pattern = '/wp\/v2\/users/';
-    $restRoute = $_REQUEST['rest_route'];
-    if(isset($_REQUEST['rest_route']) && preg_match($pattern, $_REQUEST['rest_route']) ) {
+    $pattern = '/wp\/v2\/users/i';
+    $restRouteMatch = (isset($_REQUEST['rest_route']) && preg_match($pattern, $_REQUEST['rest_route']));
+    $requestUriMatch = (isset($_SERVER['REQUEST_URI']) && preg_match($pattern, $_SERVER['REQUEST_URI']));
+    if( $restRouteMatch || $requestUriMatch ) {
         if(get_option( 'disableRestUser' )) {
             display_404();
         }        
