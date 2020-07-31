@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Author Security\n"
+"POT-Creation-Date: 2020-07-28 13:20+0200\n"
+"PO-Revision-Date: 2020-07-28 13:20+0200\n"
+"Last-Translator: \n"
+"Language-Team: WP Author Security\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;esc_attr_e\n"
+"X-Poedit-SearchPath-0: wp-author-security.php\n"
+"X-Poedit-SearchPath-1: options.php\n"
+
+#: options.php:94
+msgid "WP Author Security Settings"
+msgstr "WP Author Security Einstellungen"
+
+#: options.php:100
+msgid "Stop author ID user enumeration"
+msgstr "Unterbinde Nutzer-ID Enumeration"
+
+#: options.php:105 options.php:126
+msgid "don't show any users"
+msgstr "Zeige keine Nutzer"
+
+#: options.php:109 options.php:130
+msgid "show only users with posts"
+msgstr "Zeige nur Nutzer mit Beiträgen"
+
+#: options.php:113 options.php:134
+msgid "deactivate protection"
+msgstr "Deaktiviere Schutz"
+
+#: options.php:116
+msgid "Disable the /?author=&lt;id&gt; endpoint."
+msgstr "Zeige eine Standardfehlerseite für die URI: /?author=&lt;id&gt;."
+
+#: options.php:121
+msgid "Stop author NAME user enumeration"
+msgstr "Unterbinde Nutzer-Namen Enumeration"
+
+#: options.php:137
+msgid ""
+"Disable the /author/&lt;name&gt; and /?author_name=&lt;name&gt; endpoints."
+msgstr ""
+"Zeige eine Standardfehlerseite für die URI: /author/&lt;name&gt; und /?"
+"author_name=&lt;name&gt;."
+
+#: options.php:142
+msgid "Disable for logged in users"
+msgstr "Deaktiviere für angemeldete Nutzer"
+
+#: options.php:145
+msgid "Disable protection for logged in users."
+msgstr "Deaktiviert den Schutz für angemeldete Nutzer."
+
+#: options.php:150
+msgid "Protect REST API user enumeration"
+msgstr "Unterbinde REST API Nutzer-Enumeration"
+
+#: options.php:153
+msgid "Disable REST API endpoint wp-json/wp/v2/users."
+msgstr ""
+"Deaktiviert die REST API URI /wp-json/wp/v2/users und zeigt die "
+"Standardfehlerseite."
+
+#: options.php:157
+msgid "Stop user enumeration on login/reset password form"
+msgstr "Unterbinde Enumeration auf der Login/Passwort vergessen Seite"
+
+#: options.php:160
+msgid ""
+"Displays a neutral message when either the username or password is incorrect."
+msgstr ""
+"Zeigt eine neutrale Fehlermeldung an, wenn der Benutzername oder das "
+"Passwort falsch ist."
+
+#: wp-author-security.php:142
+#, php-format
+msgid ""
+"The entered username or password is not correct. <a href=%s>Lost your "
+"password</a>?"
+msgstr ""
+"Der eingegebene Benutzername oder das Passwort ist nicht korrekt. <a href="
+"%s>Passwort vergessen</a>?"
+
+#~ msgid "Lost your password"
+#~ msgstr "Passw"

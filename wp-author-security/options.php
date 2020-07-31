@@ -43,16 +43,24 @@ function register_wp_author_security_settings() {
         'sanitize_callback' => 'sanitize_checkbox',                                                                                    
         'default' => true                                             
     );
+    $argsLoginError = array(                                     
+        'description' => 'Display a neutral message on login failures.',                                          
+        'type' => 'booelan',                                      
+        'sanitize_callback' => 'sanitize_checkbox',                                                                                    
+        'default' => true                                             
+    );
 
     register_setting( 'wp-author-security-group', 'protectAuthor', array_merge($argsBase, $argsAuthor) );
     register_setting( 'wp-author-security-group', 'protectAuthorName', array_merge($argsBase, $argsAuthorName) );
     register_setting( 'wp-author-security-group', 'disableLoggedIn', array_merge($argsBase, $argsLoggedIn) );
     register_setting( 'wp-author-security-group', 'disableRestUser', array_merge($argsBase, $argsRestUser) );
+    register_setting( 'wp-author-security-group', 'customLoginError', array_merge($argsBase, $argsLoginError) );
 
     add_option( 'protectAuthor',  $argsAuthor['default']); 
     add_option( 'protectAuthorName',  $argsAuthorName['default']);
     add_option( 'disableLoggedIn',  $argsLoggedIn['default']);
     add_option( 'disableRestUser',  $argsRestUser['default']);
+    add_option( 'customLoginError',  $argsLoginError['default']);
 };
 
 function wp_author_security_menu() {
@@ -83,66 +91,73 @@ function wp_author_security_options_page() {
 
     <div class="wrap">
         <?php screen_icon(); ?>
-        <h2>WP Author Security Settings</h2>
+        <h2><?php echo __('WP Author Security Settings', 'wp-author-security'); ?></h2>
     <form method="post" action="options.php">
     <?php settings_fields( 'wp-author-security-group' ); ?>
     <?php do_settings_sections( 'wp-author-security-group' ); ?>
     <table class="form-table">
         <tr valign="top">
-        <th scope="row">Stop author ID user enumeration</th>
+        <th scope="row"><?php echo __('Stop author ID user enumeration', 'wp-author-security'); ?></th>
         <td>
             <select name="protectAuthor">
                 <option value="<?php echo AuthorSettingsEnum::COMPLETE; ?>"
                     <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
-                    for all users
+                    <?php echo __("don't show any users", 'wp-author-security'); ?>
                 </option>
                 <option value="<?php echo AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
                     <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
-                    for users without posts
+                    <?php echo __('show only users with posts', 'wp-author-security'); ?>
                 </option>            
                 <option value="<?php echo AuthorSettingsEnum::DISABLED; ?>"
                     <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
-                    deactivate protection
+                    <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>
-            <p>Disable the /?author=&lt;id&gt; endpoint.</p>
+            <p><?php echo __('Disable the /?author=&lt;id&gt; endpoint.', 'wp-author-security'); ?></p>
         </td>
         </tr>
          
         <tr valign="top">
-        <th scope="row">Stop author NAME user enumeration</th>
+        <th scope="row"><?php echo __('Stop author NAME user enumeration', 'wp-author-security'); ?></th>
         <td>
             <select name="protectAuthorName">
                 <option value="<?php echo AuthorSettingsEnum::COMPLETE; ?>"
                     <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
-                    for all users
+                    <?php echo __("don't show any users", 'wp-author-security'); ?>
                 </option>
                 <option value="<?php echo AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
                     <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
-                    for users without posts
+                    <?php echo __('show only users with posts', 'wp-author-security'); ?>
                 </option>
                 <option value="<?php echo AuthorSettingsEnum::DISABLED; ?>"
                     <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
-                    deactivate protection
+                    <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>
-            <p>Disable the /author/&lt;name&gt; and /?author_name=&lt;name&gt; endpoints.</p>
+            <p><?php echo __('Disable the /author/&lt;name&gt; and /?author_name=&lt;name&gt; endpoints.', 'wp-author-security'); ?></p>
         </td>
         </tr>
         
         <tr valign="top">
-        <th scope="row">Disable for logged in users</th>
+        <th scope="row"><?php echo __('Disable for logged in users', 'wp-author-security'); ?></th>
         <td>
             <input type="checkbox" name="disableLoggedIn"<?php if ( get_option('disableLoggedIn') )  echo ' checked="checked"'; ?> />
-            <p>Disable protection for logged in users.</p>
+            <p><?php echo __('Disable protection for logged in users.', 'wp-author-security'); ?></p>
         </td>
         </tr>
 
         <tr valign="top">
-        <th scope="row">Protect REST API user enumeration</th>
+        <th scope="row"><?php echo __('Protect REST API user enumeration', 'wp-author-security'); ?></th>
         <td>
             <input type="checkbox" name="disableRestUser"<?php if ( get_option('disableRestUser') )  echo ' checked="checked"'; ?> />
-            <p>Disable REST API endpoint wp-json/wp/v2/users.</p>
+            <p><?php echo __('Disable REST API endpoint wp-json/wp/v2/users.', 'wp-author-security'); ?></p>
+        </td>
+        </tr>
+        <tr valign="top">
+        <th scope="row"><?php echo __('Stop user enumeration on login/reset password form', 'wp-author-security'); ?></th>
+        <td>
+            <input type="checkbox" name="customLoginError"<?php if ( get_option('customLoginError') )  echo ' checked="checked"'; ?> />
+            <p><?php echo __('Displays a neutral message when either the username or password is incorrect.', 'wp-author-security'); ?></p>
         </td>
         </tr>
     </table>

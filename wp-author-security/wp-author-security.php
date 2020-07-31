@@ -1,10 +1,12 @@
 <?php
 /**
  * Plugin Name: WP Author Security
+ * Text Domain: wp-author-security
+ * Domain Path: /languages
  * Description: Protects against user enumeration attacks for author pages. By default, Wordpress will display some sensitive information on author pages. The author page is typically called by requesting the URI https://yourdomain.com/?author=&lt;id&gt; or with permalinks https://yourdomain.com/author/&lt;username&gt;. The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. In some cases, it is not wanted to expose this information to the public. An attacker is able to brute-force valid IDs or valid username. This information might be used for further attacks like social-engineering attacks or login brute-force attacks with gathered usernames. By using the extension, you are able to disable the author pages either completely or only for users that do not have any published posts yet. When the page is disabled the default 404 page not found is displayed.
  * Author: mgm-sp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.1.2
+ * Version: 1.2.0
  * License: GPL3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
@@ -16,11 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once (dirname( __FILE__ ) . '/options.php');
 
-add_action( 'template_redirect', 'check_author_request', 1 );
-add_action( 'rest_api_init', 'check_rest_api', 10);
+/**
+ * initialize the plugin
+ */
+function init() {
+    add_action( 'template_redirect', 'check_author_request', 1 );
+    add_action( 'rest_api_init', 'check_rest_api', 10 );
+    add_action( 'plugins_loaded', 'wp_author_security_load_plugin_textdomain' );
+    add_filter( 'login_errors','login_error_message', 1 );
+    add_action( 'lost_password', 'check_lost_password_error' );
+}
 
 /**
- * checks for author parameter in requests and decideds wheter to block request (404) 
+ * checks for author parameter in requests and decides whether to block request (404) 
  * or allow to display the requested author profile
  */
 function check_author_request() {
@@ -42,7 +52,7 @@ function check_author_request() {
         return;
     }
     
-    if(!isEnabled()) {
+    if(!is_enabled_for_logged_in()) {
         return;
     }
 
@@ -67,7 +77,7 @@ function check_author_request() {
  */
 function check_rest_api()
 {
-    if(!isEnabled()) {
+    if(!is_enabled_for_logged_in()) {
         return;
     }
     $pattern = '/wp\/v2\/users/i';
@@ -83,6 +93,9 @@ function check_rest_api()
 
 /**
  * Checks if requested user should be blocked or not
+ * @param int $option the WP option
+ * @param WP_User $user The user object
+ * @return boolean
  */
 function isProtected($option, $user) {
     // if option is set to block only users without any posts
@@ -121,9 +134,55 @@ function display_404() {
 }
 
 /**
- * checks whether plugin is enabled for logged in users or not
+ * Overrides the default error message on login errors
+ * @global WP_Error $errors
+ * @param string $error
+ * @return string
  */
-function isEnabled() {
+function login_error_message($error){
+    global $errors;
+    $err_codes = $errors->get_error_codes();
+
+    //check if protection is enabled
+    if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
+        return $error;
+    }
+
+    // check if this is the error we are looking for
+    if ( in_array( 'invalid_username', $err_codes ) || in_array( 'incorrect_password', $err_codes )) {
+        //its the right error so we can overwrite it
+        $error = sprintf( __('The entered username or password is not correct. <a href=%s>Lost your password</a>?', 'wp-author-security'), wp_lostpassword_url());
+    }
+    
+    return $error;
+}
+
+/**
+ * Always redirect the user to the confirm page when an invalid username or mail was entered during password reset process
+ * @param WP_Error $errors
+ * @return void
+ */
+function check_lost_password_error($errors) {
+
+    //check if protection is enabled
+    if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
+        return;
+    }
+    
+    if( is_wp_error( $errors ) ) {
+        if( $errors->get_error_code() === 'invalidcombo' || $errors->get_error_code() ==='invalid_email' ) {
+            $redirect = 'wp-login.php?checkemail=confirm';
+            wp_safe_redirect($redirect);
+        }
+    }
+    return;
+}
+
+/**
+ * Checks whether plugin is enabled for logged in users or not
+ * @return boolean
+ */
+function is_enabled_for_logged_in() {
     // check if protection is disabled for logged in user
     if( is_user_logged_in() && get_option('disableLoggedIn')) {
         return false;
@@ -131,3 +190,8 @@ function isEnabled() {
     return true;
 }
 
+function wp_author_security_load_plugin_textdomain() {
+    load_plugin_textdomain( 'wp-author-security', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+}
+
+init();
