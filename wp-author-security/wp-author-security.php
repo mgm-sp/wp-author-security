@@ -3,11 +3,11 @@
  * Plugin Name: WP Author Security
  * Text Domain: wp-author-security
  * Domain Path: /languages
- * Description: Protects against user enumeration attacks for author pages. By default, Wordpress will display some sensitive information on author pages. The author page is typically called by requesting the URI https://yourdomain.com/?author=&lt;id&gt; or with permalinks https://yourdomain.com/author/&lt;username&gt;. The page will include the full name (first and last name) as well as the username of the author which is used to login to Wordpress. In some cases, it is not wanted to expose this information to the public. An attacker is able to brute-force valid IDs or valid username. This information might be used for further attacks like social-engineering attacks or login brute-force attacks with gathered usernames. By using the extension, you are able to disable the author pages either completely or only for users that do not have any published posts yet. When the page is disabled the default 404 page not found is displayed.
+ * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
  * Author: mgm-sp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.2.0
- * License: GPL3
+ * Version: 1.2.1
+ * License: GPLv3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
 
@@ -25,7 +25,7 @@ function init() {
     add_action( 'template_redirect', 'check_author_request', 1 );
     add_action( 'rest_api_init', 'check_rest_api', 10 );
     add_action( 'plugins_loaded', 'wp_author_security_load_plugin_textdomain' );
-    add_filter( 'login_errors','login_error_message', 1 );
+    add_filter( 'login_errors', 'login_error_message', 1 );
     add_action( 'lost_password', 'check_lost_password_error' );
 }
 
@@ -100,7 +100,7 @@ function check_rest_api()
 function isProtected($option, $user) {
     // if option is set to block only users without any posts
     if ( $option ==  AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS ) {
-        if ( count_user_posts( $user->id )  == 0  ) {
+        if ( count_user_posts( $user->ID )  == 0  ) {
             return true;
         }
         // or if all users shall be blocked
@@ -170,7 +170,7 @@ function check_lost_password_error($errors) {
     }
     
     if( is_wp_error( $errors ) ) {
-        if( $errors->get_error_code() === 'invalidcombo' || $errors->get_error_code() ==='invalid_email' ) {
+        if( $errors->get_error_code() === 'invalidcombo' || $errors->get_error_code() === 'invalid_email' ) {
             $redirect = 'wp-login.php?checkemail=confirm';
             wp_safe_redirect($redirect);
         }

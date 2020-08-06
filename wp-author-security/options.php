@@ -90,7 +90,6 @@ function wp_author_security_options_page() {
 ?>
 
     <div class="wrap">
-        <?php screen_icon(); ?>
         <h2><?php echo __('WP Author Security Settings', 'wp-author-security'); ?></h2>
     <form method="post" action="options.php">
     <?php settings_fields( 'wp-author-security-group' ); ?>
