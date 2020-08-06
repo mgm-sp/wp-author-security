@@ -142,14 +142,16 @@ function display_404() {
 function login_error_message($error){
     global $errors;
     $err_codes = $errors->get_error_codes();
-
+    
     //check if protection is enabled
     if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
         return $error;
     }
 
     // check if this is the error we are looking for
-    if ( in_array( 'invalid_username', $err_codes ) || in_array( 'incorrect_password', $err_codes )) {
+    if (    in_array( 'invalid_username', $err_codes ) || 
+            in_array( 'invalid_email', $err_codes ) ||
+            in_array( 'incorrect_password', $err_codes )) {
         //its the right error so we can overwrite it
         $error = sprintf( __('The entered username or password is not correct. <a href=%s>Lost your password</a>?', 'wp-author-security'), wp_lostpassword_url());
     }
