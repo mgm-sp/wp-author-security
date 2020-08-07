@@ -1,5 +1,5 @@
 === WP Author Security ===
-Contributors: mgm-sp
+Contributors: mgmsp
 Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
 Tested up to: 5.4

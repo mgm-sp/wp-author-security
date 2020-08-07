@@ -4,7 +4,7 @@
  * Text Domain: wp-author-security
  * Domain Path: /languages
  * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
- * Author: mgm-sp
+ * Author: mgmsp
  * Author URI: https://www.mgm-sp.com
  * Version: 1.2.1
  * License: GPLv3
@@ -142,7 +142,7 @@ function display_404() {
 function login_error_message($error){
     global $errors;
     $err_codes = $errors->get_error_codes();
-    
+
     //check if protection is enabled
     if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
         return $error;
