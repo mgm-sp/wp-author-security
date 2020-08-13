@@ -21,19 +21,19 @@ require_once (dirname( __FILE__ ) . '/options.php');
 /**
  * initialize the plugin
  */
-function init() {
-    add_action( 'template_redirect', 'check_author_request', 1 );
-    add_action( 'rest_api_init', 'check_rest_api', 10 );
-    add_action( 'plugins_loaded', 'wp_author_security_load_plugin_textdomain' );
-    add_filter( 'login_errors', 'login_error_message', 1 );
-    add_action( 'lost_password', 'check_lost_password_error' );
+function wpas_init() {
+    add_action( 'template_redirect', 'wpas_check_author_request', 1 );
+    add_action( 'rest_api_init', 'wpas_check_rest_api', 10 );
+    add_action( 'plugins_loaded', 'wpas_load_plugin_textdomain' );
+    add_filter( 'login_errors', 'wpas_login_error_message', 1 );
+    add_action( 'lost_password', 'wpas_check_lost_password_error' );
 }
 
 /**
  * checks for author parameter in requests and decides whether to block request (404) 
  * or allow to display the requested author profile
  */
-function check_author_request() {
+function wpas_check_author_request() {
 
     $field = '';
     $value = '';
@@ -41,18 +41,18 @@ function check_author_request() {
     $authorName = get_query_var('author_name', false);
 
     // matches requests to "/author/<username>"
-    if ( $authorName && get_option( 'protectAuthorName' ) != AuthorSettingsEnum::DISABLED ) {
+    if ( $authorName && get_option( 'protectAuthorName' ) != WPASAuthorSettingsEnum::DISABLED ) {
         $field = 'login';
         $value = trim($authorName);
         // matches requests to "?author=<id>"
-    } else if ( $author && !$authorName && get_option( 'protectAuthor' ) != AuthorSettingsEnum::DISABLED ) {
+    } else if ( $author && !$authorName && get_option( 'protectAuthor' ) != WPASAuthorSettingsEnum::DISABLED ) {
         $field = 'id';
         $value = intval($author);        
     } else {
         return;
     }
     
-    if(!is_enabled_for_logged_in()) {
+    if(!wpas_is_enabled_for_logged_in()) {
         return;
     }
 
@@ -62,11 +62,11 @@ function check_author_request() {
         return;
     }
 
-    $disable = ( $field == 'id' ? isProtected( get_option( 'protectAuthor' ), $user ) : isProtected( get_option( 'protectAuthorName' ), $user ) );
+    $disable = ( $field == 'id' ? wpas_isProtected( get_option( 'protectAuthor' ), $user ) : wpas_isProtected( get_option( 'protectAuthorName' ), $user ) );
     
     // when protection is enabled display 404
     if( $disable ) {
-        display_404();  
+        wpas_display_404();  
     }
 
     return;    
@@ -75,9 +75,9 @@ function check_author_request() {
 /**
  * disables user enumeration for the REST API endpoint wp-json/wp/v2/users
  */
-function check_rest_api()
+function wpas_check_rest_api()
 {
-    if(!is_enabled_for_logged_in()) {
+    if(!wpas_is_enabled_for_logged_in()) {
         return;
     }
     $pattern = '/wp\/v2\/users/i';
@@ -85,7 +85,7 @@ function check_rest_api()
     $requestUriMatch = (isset($_SERVER['REQUEST_URI']) && preg_match($pattern, $_SERVER['REQUEST_URI']));
     if( $restRouteMatch || $requestUriMatch ) {
         if(get_option( 'disableRestUser' )) {
-            display_404();
+            wpas_display_404();
         }        
     }    
     return;
@@ -97,14 +97,14 @@ function check_rest_api()
  * @param WP_User $user The user object
  * @return boolean
  */
-function isProtected($option, $user) {
+function wpas_isProtected($option, $user) {
     // if option is set to block only users without any posts
-    if ( $option ==  AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS ) {
+    if ( $option ==  WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS ) {
         if ( count_user_posts( $user->ID )  == 0  ) {
             return true;
         }
         // or if all users shall be blocked
-    } else if ( $option ==  AuthorSettingsEnum::COMPLETE ){
+    } else if ( $option ==  WPASAuthorSettingsEnum::COMPLETE ){
         return true;
     }
     return false;
@@ -113,7 +113,7 @@ function isProtected($option, $user) {
 /**
  * Display the 404 page not found site
  */
-function display_404() {
+function wpas_display_404() {
     global $wp_query;
     $template = null;
 
@@ -139,12 +139,12 @@ function display_404() {
  * @param string $error
  * @return string
  */
-function login_error_message($error){
+function wpas_login_error_message($error){
     global $errors;
     $err_codes = $errors->get_error_codes();
 
     //check if protection is enabled
-    if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
+    if( !get_option( 'customLoginError') || !wpas_is_enabled_for_logged_in() ) {
         return $error;
     }
 
@@ -164,10 +164,10 @@ function login_error_message($error){
  * @param WP_Error $errors
  * @return void
  */
-function check_lost_password_error($errors) {
+function wpas_check_lost_password_error($errors) {
 
     //check if protection is enabled
-    if( !get_option( 'customLoginError') || !is_enabled_for_logged_in() ) {
+    if( !get_option( 'customLoginError') || !wpas_is_enabled_for_logged_in() ) {
         return;
     }
     
@@ -184,7 +184,7 @@ function check_lost_password_error($errors) {
  * Checks whether plugin is enabled for logged in users or not
  * @return boolean
  */
-function is_enabled_for_logged_in() {
+function wpas_is_enabled_for_logged_in() {
     // check if protection is disabled for logged in user
     if( is_user_logged_in() && get_option('disableLoggedIn')) {
         return false;
@@ -192,8 +192,8 @@ function is_enabled_for_logged_in() {
     return true;
 }
 
-function wp_author_security_load_plugin_textdomain() {
+function wpas_load_plugin_textdomain() {
     load_plugin_textdomain( 'wp-author-security', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 }
 
-init();
+wpas_init();

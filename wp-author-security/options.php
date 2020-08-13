@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-abstract class AuthorSettingsEnum {
+abstract class WPASAuthorSettingsEnum {
     const DISABLED = 0;
     const COMPLETE = 1;
     const ONLY_FOR_USERS_WITHOUT_POSTS = 2;
@@ -20,33 +20,33 @@ if( is_admin() ) {
 function register_wp_author_security_settings() {
     $argsBase = array(
         'type' => 'integer',                                      
-        'sanitize_callback' => 'sanitize_int',                                           
+        'sanitize_callback' => 'wpas_sanitize_int',                                           
         'show_in_rest' => false                                                                                     
     );
     $argsAuthor = array(                                     
         'description' => 'Whether to protect the ?author=<id> endpoint.', 
-        'default' => AuthorSettingsEnum::COMPLETE                                           
+        'default' => WPASAuthorSettingsEnum::COMPLETE                                           
     );
     $argsAuthorName = array(                                     
         'description' => 'Whether to protect the /author/<name> endpoint.', 
-        'default' => AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS                                                                                    
+        'default' => WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS                                                                                    
     );
     $argsLoggedIn = array(                                     
         'description' => 'Whether to enable protection for logged in user.',                                          
         'type' => 'booelan',                                      
-        'sanitize_callback' => 'sanitize_checkbox',                                                                                    
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
         'default' => false                                             
     );
     $argsRestUser = array(                                     
         'description' => 'Whether to protect REST API endpoint wp-json/wp/v2/users.',                                          
         'type' => 'booelan',                                      
-        'sanitize_callback' => 'sanitize_checkbox',                                                                                    
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
         'default' => true                                             
     );
     $argsLoginError = array(                                     
         'description' => 'Display a neutral message on login failures.',                                          
         'type' => 'booelan',                                      
-        'sanitize_callback' => 'sanitize_checkbox',                                                                                    
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
         'default' => true                                             
     );
 
@@ -72,14 +72,14 @@ function wp_author_security_menu() {
         'wp_author_security_options_page' );
 }
 
-function sanitize_checkbox ( $input ) {
+function wpas_sanitize_checkbox ( $input ) {
     if($input === 'on') {
         return true;
     }
     return false;
 }
 
-function sanitize_int ( $input ) {
+function wpas_sanitize_int ( $input ) {
     return intval( trim( $input ) );
 }
 
@@ -99,16 +99,16 @@ function wp_author_security_options_page() {
         <th scope="row"><?php echo __('Stop author ID user enumeration', 'wp-author-security'); ?></th>
         <td>
             <select name="protectAuthor">
-                <option value="<?php echo AuthorSettingsEnum::COMPLETE; ?>"
-                    <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::COMPLETE; ?>"
+                    <?php if ( get_option('protectAuthor') == WPASAuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
                     <?php echo __("don't show any users", 'wp-author-security'); ?>
                 </option>
-                <option value="<?php echo AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
-                    <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
+                    <?php if ( get_option('protectAuthor') == WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
                     <?php echo __('show only users with posts', 'wp-author-security'); ?>
                 </option>            
-                <option value="<?php echo AuthorSettingsEnum::DISABLED; ?>"
-                    <?php if ( get_option('protectAuthor') == AuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::DISABLED; ?>"
+                    <?php if ( get_option('protectAuthor') == WPASAuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
                     <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>
@@ -120,16 +120,16 @@ function wp_author_security_options_page() {
         <th scope="row"><?php echo __('Stop author NAME user enumeration', 'wp-author-security'); ?></th>
         <td>
             <select name="protectAuthorName">
-                <option value="<?php echo AuthorSettingsEnum::COMPLETE; ?>"
-                    <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::COMPLETE; ?>"
+                    <?php if ( get_option('protectAuthorName') == WPASAuthorSettingsEnum::COMPLETE )  echo ' selected="selected"'; ?>>
                     <?php echo __("don't show any users", 'wp-author-security'); ?>
                 </option>
-                <option value="<?php echo AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
-                    <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS; ?>"
+                    <?php if ( get_option('protectAuthorName') == WPASAuthorSettingsEnum::ONLY_FOR_USERS_WITHOUT_POSTS )  echo ' selected="selected"'; ?>>
                     <?php echo __('show only users with posts', 'wp-author-security'); ?>
                 </option>
-                <option value="<?php echo AuthorSettingsEnum::DISABLED; ?>"
-                    <?php if ( get_option('protectAuthorName') == AuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
+                <option value="<?php echo WPASAuthorSettingsEnum::DISABLED; ?>"
+                    <?php if ( get_option('protectAuthorName') == WPASAuthorSettingsEnum::DISABLED )  echo ' selected="selected"'; ?>>
                     <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>

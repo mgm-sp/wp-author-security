@@ -2,7 +2,7 @@
 Contributors: mgmsp
 Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
-Tested up to: 5.4
+Tested up to: 5.5
 Requires PHP: 5.6
 Stable tag: 1.2.1
 License: GPLv3
