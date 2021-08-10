@@ -49,18 +49,35 @@ function register_wp_author_security_settings() {
         'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
         'default' => true                                             
     );
+    $argsFilterFeed = array(                                     
+        'description' => 'Remove the author name in feeds',                                          
+        'type' => 'booelan',                                      
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
+        'default' => true                                             
+    );
+    $argsFilterEmbed = array(                                     
+        'description' => 'Remove the author name in embeds',
+        'type' => 'booelan',                                                                             
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
+        'default' => true                                             
+    );
+    
+    add_option( 'protectAuthor',  $argsAuthor['default']); 
+    add_option( 'protectAuthorName',  $argsAuthorName['default']);
+    add_option( 'disableLoggedIn',  $argsLoggedIn['default']);
+    add_option( 'disableRestUser',  $argsRestUser['default']);
+    add_option( 'customLoginError',  $argsLoginError['default']);
+    add_option( 'wpas_filterFeed',  $argsFilterFeed['default']);
+    add_option( 'wpas_filterEmbed',  $argsFilterEmbed['default']);
 
     register_setting( 'wp-author-security-group', 'protectAuthor', array_merge($argsBase, $argsAuthor) );
     register_setting( 'wp-author-security-group', 'protectAuthorName', array_merge($argsBase, $argsAuthorName) );
     register_setting( 'wp-author-security-group', 'disableLoggedIn', array_merge($argsBase, $argsLoggedIn) );
     register_setting( 'wp-author-security-group', 'disableRestUser', array_merge($argsBase, $argsRestUser) );
     register_setting( 'wp-author-security-group', 'customLoginError', array_merge($argsBase, $argsLoginError) );
+    register_setting( 'wp-author-security-group', 'wpas_filterFeed', array_merge($argsBase, $argsFilterFeed) );
+    register_setting( 'wp-author-security-group', 'wpas_filterEmbed', array_merge($argsBase, $argsFilterEmbed) );
 
-    add_option( 'protectAuthor',  $argsAuthor['default']); 
-    add_option( 'protectAuthorName',  $argsAuthorName['default']);
-    add_option( 'disableLoggedIn',  $argsLoggedIn['default']);
-    add_option( 'disableRestUser',  $argsRestUser['default']);
-    add_option( 'customLoginError',  $argsLoginError['default']);
 };
 
 function wp_author_security_menu() {
@@ -112,7 +129,7 @@ function wp_author_security_options_page() {
                     <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>
-            <p><?php echo __('Disable the /?author=&lt;id&gt; endpoint.', 'wp-author-security'); ?></p>
+            <p class="description"><?php echo __('Disable the /?author=&lt;id&gt; endpoint.', 'wp-author-security'); ?></p>
         </td>
         </tr>
          
@@ -133,15 +150,7 @@ function wp_author_security_options_page() {
                     <?php echo __('deactivate protection', 'wp-author-security'); ?>
                 </option>
             </select>
-            <p><?php echo __('Disable the /author/&lt;name&gt; and /?author_name=&lt;name&gt; endpoints.', 'wp-author-security'); ?></p>
-        </td>
-        </tr>
-        
-        <tr valign="top">
-        <th scope="row"><?php echo __('Disable for logged in users', 'wp-author-security'); ?></th>
-        <td>
-            <input type="checkbox" name="disableLoggedIn"<?php if ( get_option('disableLoggedIn') )  echo ' checked="checked"'; ?> />
-            <p><?php echo __('Disable protection for logged in users.', 'wp-author-security'); ?></p>
+            <p class="description"><?php echo __('Disable the /author/&lt;name&gt; and /?author_name=&lt;name&gt; endpoints.', 'wp-author-security'); ?></p>
         </td>
         </tr>
 
@@ -149,14 +158,38 @@ function wp_author_security_options_page() {
         <th scope="row"><?php echo __('Protect REST API user enumeration', 'wp-author-security'); ?></th>
         <td>
             <input type="checkbox" name="disableRestUser"<?php if ( get_option('disableRestUser') )  echo ' checked="checked"'; ?> />
-            <p><?php echo __('Disable REST API endpoint wp-json/wp/v2/users.', 'wp-author-security'); ?></p>
+            <p class="description"><?php echo __('Disable REST API endpoint wp-json/wp/v2/users.', 'wp-author-security'); ?></p>
         </td>
         </tr>
         <tr valign="top">
         <th scope="row"><?php echo __('Stop user enumeration on login/reset password form', 'wp-author-security'); ?></th>
         <td>
             <input type="checkbox" name="customLoginError"<?php if ( get_option('customLoginError') )  echo ' checked="checked"'; ?> />
-            <p><?php echo __('Displays a neutral message when either the username or password is incorrect.', 'wp-author-security'); ?></p>
+            <p class="description"><?php echo __('Displays a neutral message when either the username or password is incorrect.', 'wp-author-security'); ?></p>
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row"><?php echo __('Remove author name in feeds', 'wp-author-security'); ?></th>
+        <td>
+            <input type="checkbox" name="wpas_filterFeed"<?php if ( get_option('wpas_filterFeed') )  echo ' checked="checked"'; ?> />
+            <p class="description"><?php echo __('Setting this option will remove the author name in the /feed endpoint.', 'wp-author-security'); ?></p>
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row"><?php echo __('Remove author name in embeds', 'wp-author-security'); ?></th>
+        <td>
+            <input type="checkbox" name="wpas_filterEmbed"<?php if ( get_option('wpas_filterEmbed') )  echo ' checked="checked"'; ?> />
+            <p class="description"><?php echo __('Setting this option will remove the author name and link in the oEmbed API endpoint e.g.: /wp-json/oembed/1.0/embed?url=https://&lt;yourdomain&gt;.', 'wp-author-security'); ?></p>
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row"><?php echo __('Disable for logged in users', 'wp-author-security'); ?></th>
+        <td>
+            <input type="checkbox" name="disableLoggedIn"<?php if ( get_option('disableLoggedIn') )  echo ' checked="checked"'; ?> />
+            <p class="description"><?php echo __('Disable protection for logged in users.', 'wp-author-security'); ?></p>
         </td>
         </tr>
     </table>

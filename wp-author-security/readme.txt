@@ -2,9 +2,9 @@
 Contributors: mgmsp
 Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
-Tested up to: 5.5
+Tested up to: 5.8
 Requires PHP: 5.6
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv3
 
 Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
@@ -27,6 +27,8 @@ In addition, the plugin will also protect other locations which are commonly use
   `https://yourdomain.tld/wp-json/wp/v2/users`
 * The log in page where different error messages will indicate whether an entered user name or mail address exists or not. The plugin will display a neutral error message independently whether the user exists or not.
 * The password forgotten function will also allow an attacker to check for the existence of a user. As for the log in page the plugin will display a neutral message even when the user does not exists.
+* Requesting the feed endpoint /feed of your blog will also allow others to see the username or display name of the author. The plugin will remove the name from the result list.
+* Wordpress supports so-called oEmbeds. This is a technique to embed a reference to a post into another post. However, this reference will also contain the author name and a direct link to the profile page. The plugin will also remove the name and link here.
 
 == Screenshots ==
 1. Admin settings
@@ -35,6 +37,10 @@ In addition, the plugin will also protect other locations which are commonly use
 
 == Changelog ==
 	
+= 1.3.0 =
+* added protection for the /feed endpoint
+* added protection for the oEmbed endpoint
+
 = 1.2.1 =
 * updated documentation
 * bugfix wrong mail detection

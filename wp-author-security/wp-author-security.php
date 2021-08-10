@@ -6,7 +6,7 @@
  * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
  * Author: mgmsp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.2.1
+ * Version: 1.3.0
  * License: GPLv3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
@@ -27,6 +27,8 @@ function wpas_init() {
     add_action( 'plugins_loaded', 'wpas_load_plugin_textdomain' );
     add_filter( 'login_errors', 'wpas_login_error_message', 1 );
     add_action( 'lost_password', 'wpas_check_lost_password_error' );
+    add_filter( 'the_author', 'wpas_filter_feed', 1);
+    add_filter( 'oembed_response_data', 'wpas_filter_oembed', 10, 4 );
 }
 
 /**
@@ -179,6 +181,48 @@ function wpas_check_lost_password_error($errors) {
     }
     return;
 }
+
+/**
+ * Filter feeds and remove the author name
+ * @param string $displayName The display name of the author
+ * @return string
+ */
+function wpas_filter_feed($displayName) {
+    
+	//check if protection is enabled
+    if( !get_option( 'wpas_filterFeed') || !wpas_is_enabled_for_logged_in() ) {
+        return $displayName;
+    }
+
+    if ( is_feed() ) {
+        return '';
+	} 
+
+    // leave other occurrences untouched
+    return $displayName;
+}
+/**
+ * Filter oembed and remove the author name and link
+ * @param array $data
+ * @param WP_Post $post
+ * @param int $width
+ * @param int $height
+ * @return array
+ */
+function wpas_filter_oembed( $data, $post, $width, $height ) {
+
+    //check if protection is enabled
+    // note: user is always unauthenticated when this function is reached, therefore it can not be disabled for logged in users
+    if( !get_option( 'wpas_filterEmbed') || !wpas_is_enabled_for_logged_in() ) {
+        return $data;
+    }
+
+    unset($data['author_name']);
+    unset($data['author_url']);
+    
+    return $data;
+};
+
 
 /**
  * Checks whether plugin is enabled for logged in users or not
