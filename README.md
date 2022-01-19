@@ -31,6 +31,8 @@ In addition, the plugin will also protect other locations which are commonly use
 * The password forgotten function will also allow an attacker to check for the existence of a user. As for the log in page the plugin will display a neutral message even when the user does not exists.
 * Requesting the feed endpoint /feed of your blog will also allow others to see the username or display name of the author. The plugin will remove the name from the result list.
 * Wordpress supports so-called oEmbeds. This is a technique where you can embed a reference to a post into another post. However, this reference will also contain the author name and a direct link to the profile page. The plugin will also remove the name and link here.
+* Since Wordpress 5.5 a default sitemap can be reached via /wp-sitemap.xml. This sitemap will disclose the usernames of all authors. If this should not be disclosed you are able to disable this feature of Wordpress.
+
 
 
 ## Installation

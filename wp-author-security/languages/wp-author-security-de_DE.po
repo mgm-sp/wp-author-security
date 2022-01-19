@@ -92,6 +92,14 @@ msgstr "Entferne Autorennamen in eingebetteten Beiträgen"
 msgid "Setting this option will remove the author name and link in the oEmbed API endpoint e.g.: /wp-json/oembed/1.0/embed?url=https://&lt;yourdomain&gt;."
 msgstr "Diese Option entfernt den Autorennamen und den Link beim Aufruf der oEmbed API z.B.: /wp-json/oembed/1.0/embed?url=https://&lt;yourdomain&gt;."
 
+#: options.php:197
+msgid "Disable the sitemap for authors"
+msgstr "Deaktiviere Autoren-Sitemap"
+
+#: options.php:200
+msgid "Since Wordpress 5.5 a default sitemap is via URL reachable (/wp-sitemap.xml). Enabling this option will remove information of authors from the sitemap."
+msgstr "Seit Wordpress 5.5 ist eine Standard-Sitemap über die URL erreichbar (/wp-sitemap.xml). Wenn diese Option aktiviert ist, werden Informationen über Autoren aus der Sitemap entfernt."
+
 #. Author URI of the plugin
 msgid "https://www.mgm-sp.com"
 msgstr "https://www.mgm-sp.com"

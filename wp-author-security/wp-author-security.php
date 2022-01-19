@@ -6,7 +6,7 @@
  * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
  * Author: mgmsp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.3.0
+ * Version: 1.4.0
  * License: GPLv3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
@@ -29,6 +29,9 @@ function wpas_init() {
     add_action( 'lost_password', 'wpas_check_lost_password_error' );
     add_filter( 'the_author', 'wpas_filter_feed', 1);
     add_filter( 'oembed_response_data', 'wpas_filter_oembed', 10, 4 );
+    // since wp 5.5
+    add_filter( 'wp_sitemaps_add_provider', 'wpas_filter_wp_sitemap_author', 10, 2 );
+    
 }
 
 /**
@@ -223,6 +226,24 @@ function wpas_filter_oembed( $data, $post, $width, $height ) {
     return $data;
 };
 
+/**
+ * Disables the author site map which is enabled since WP 5.5 by default
+ * @param WP_Sitemaps_Provider $provide
+ * @param string $name
+ * @return WP_Sitemaps_Provider|bool
+ */
+function wpas_filter_wp_sitemap_author( $provider, $name ) {
+    //check if protection is enabled
+    if( !get_option( 'wpas_filterAuthorSitemap') || !wpas_is_enabled_for_logged_in() ) {
+        return $provider;
+    }
+
+    if ( 'users' === $name ) {
+        return false;
+    }
+
+    return $provider;
+}
 
 /**
  * Checks whether plugin is enabled for logged in users or not

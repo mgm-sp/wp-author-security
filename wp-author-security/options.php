@@ -61,6 +61,12 @@ function register_wp_author_security_settings() {
         'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
         'default' => true                                             
     );
+    $argsFilterAuthorSitemap = array(                                     
+        'description' => 'Remove the author sitemap',
+        'type' => 'booelan',                                                                             
+        'sanitize_callback' => 'wpas_sanitize_checkbox',                                                                                    
+        'default' => true                                             
+    );
     
     add_option( 'protectAuthor',  $argsAuthor['default']); 
     add_option( 'protectAuthorName',  $argsAuthorName['default']);
@@ -69,6 +75,7 @@ function register_wp_author_security_settings() {
     add_option( 'customLoginError',  $argsLoginError['default']);
     add_option( 'wpas_filterFeed',  $argsFilterFeed['default']);
     add_option( 'wpas_filterEmbed',  $argsFilterEmbed['default']);
+    add_option( 'wpas_filterAuthorSitemap',  $argsFilterAuthorSitemap['default']);
 
     register_setting( 'wp-author-security-group', 'protectAuthor', array_merge($argsBase, $argsAuthor) );
     register_setting( 'wp-author-security-group', 'protectAuthorName', array_merge($argsBase, $argsAuthorName) );
@@ -77,6 +84,7 @@ function register_wp_author_security_settings() {
     register_setting( 'wp-author-security-group', 'customLoginError', array_merge($argsBase, $argsLoginError) );
     register_setting( 'wp-author-security-group', 'wpas_filterFeed', array_merge($argsBase, $argsFilterFeed) );
     register_setting( 'wp-author-security-group', 'wpas_filterEmbed', array_merge($argsBase, $argsFilterEmbed) );
+    register_setting( 'wp-author-security-group', 'wpas_filterAuthorSitemap', array_merge($argsBase, $argsFilterAuthorSitemap) );
 
 };
 
@@ -182,6 +190,14 @@ function wp_author_security_options_page() {
         <td>
             <input type="checkbox" name="wpas_filterEmbed"<?php if ( get_option('wpas_filterEmbed') )  echo ' checked="checked"'; ?> />
             <p class="description"><?php echo __('Setting this option will remove the author name and link in the oEmbed API endpoint e.g.: /wp-json/oembed/1.0/embed?url=https://&lt;yourdomain&gt;.', 'wp-author-security'); ?></p>
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row"><?php echo __('Disable the sitemap for authors', 'wp-author-security'); ?></th>
+        <td>
+            <input type="checkbox" name="wpas_filterAuthorSitemap"<?php if ( get_option('wpas_filterAuthorSitemap') )  echo ' checked="checked"'; ?> />
+            <p class="description"><?php echo __('Since Wordpress 5.5 a default sitemap is via URL reachable (/wp-sitemap.xml). Enabling this option will remove information of authors from the sitemap.', 'wp-author-security'); ?></p>
         </td>
         </tr>
 
