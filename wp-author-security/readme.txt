@@ -2,7 +2,7 @@
 Contributors: mgmsp
 Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
-Tested up to: 5.8
+Tested up to: 6.0
 Requires PHP: 5.6
 Stable tag: 1.4.0
 License: GPLv3
@@ -37,7 +37,10 @@ In addition, the plugin will also protect other locations which are commonly use
 3. Log in error message when the user name exists but a wrong password is entered.
 
 == Changelog ==
-	
+
+= 1.4.1 =
+* Bugfix error on login check
+
 = 1.4.0 =
 * added protection for the wp-sitemap.xml author disclosure
 

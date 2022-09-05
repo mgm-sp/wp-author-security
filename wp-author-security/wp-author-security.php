@@ -146,20 +146,22 @@ function wpas_display_404() {
  */
 function wpas_login_error_message($error){
     global $errors;
-    $err_codes = $errors->get_error_codes();
 
     //check if protection is enabled
     if( !get_option( 'customLoginError') || !wpas_is_enabled_for_logged_in() ) {
         return $error;
     }
 
-    // check if this is the error we are looking for
-    if (    in_array( 'invalid_username', $err_codes ) || 
-            in_array( 'invalid_email', $err_codes ) ||
-            in_array( 'incorrect_password', $err_codes )) {
-        //its the right error so we can overwrite it
-        $error = sprintf( __('The entered username or password is not correct. <a href=%s>Lost your password</a>?', 'wp-author-security'), wp_lostpassword_url());
-    }
+	if(is_wp_error($errors)) {
+		$err_codes = $errors->get_error_codes();
+		// check if this is the error we are looking for
+		if ( in_array( 'invalid_username', $err_codes ) ||
+		     in_array( 'invalid_email', $err_codes ) ||
+		     in_array( 'incorrect_password', $err_codes ) ) {
+			//its the right error so we can overwrite it
+			$error = sprintf( __( 'The entered username or password is not correct. <a href=%s>Lost your password</a>?', 'wp-author-security' ), wp_lostpassword_url() );
+		}
+	}
     
     return $error;
 }
