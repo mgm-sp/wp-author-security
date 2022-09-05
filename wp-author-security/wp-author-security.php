@@ -6,7 +6,7 @@
  * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
  * Author: mgmsp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.4.0
+ * Version: 1.4.1
  * License: GPLv3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */

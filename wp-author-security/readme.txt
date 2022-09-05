@@ -4,7 +4,7 @@ Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
 Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv3
 
 Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
