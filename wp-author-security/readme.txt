@@ -2,9 +2,9 @@
 Contributors: mgmsp
 Tags: security, user-enumeration, privacy, author, wpscan
 Requires at least: 4.7
-Tested up to: 6.0
-Requires PHP: 5.6
-Stable tag: 1.4.1
+Tested up to: 6.1
+Requires PHP: 7.4
+Stable tag: 1.5.0
 License: GPLv3
 
 Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
@@ -37,6 +37,10 @@ In addition, the plugin will also protect other locations which are commonly use
 3. Log in error message when the user name exists but a wrong password is entered.
 
 == Changelog ==
+
+= 1.5.0 =
+* added basic statistics to the settings page
+* bugfix password forgotten protection
 
 = 1.4.1 =
 * Bugfix error on login check

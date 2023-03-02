@@ -119,3 +119,7 @@ msgstr "https://github.com/mgm-sp/wp-author-security"
 #. Plugin Name of the plugin
 msgid "WP Author Security"
 msgstr "WP Author Security"
+
+#: options.php:121
+msgid "Blocked %d malicious requests since activation and %d requests in the past 7 days."
+msgstr "Insgesamt %d verdächtige Anfragen seit der Aktivierung geblockt und %d Anfragen innerhalb der letzten 7 Tage."

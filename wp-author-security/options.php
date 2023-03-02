@@ -1,5 +1,6 @@
 <?php
 
+use WP_Author_Security\WPASData;
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -85,7 +86,6 @@ function register_wp_author_security_settings() {
     register_setting( 'wp-author-security-group', 'wpas_filterFeed', array_merge($argsBase, $argsFilterFeed) );
     register_setting( 'wp-author-security-group', 'wpas_filterEmbed', array_merge($argsBase, $argsFilterEmbed) );
     register_setting( 'wp-author-security-group', 'wpas_filterAuthorSitemap', array_merge($argsBase, $argsFilterAuthorSitemap) );
-
 };
 
 function wp_author_security_menu() {
@@ -112,10 +112,18 @@ function wpas_sanitize_int ( $input ) {
  * display Option's page
  */
 function wp_author_security_options_page() {
+    $wpasMeta = new WPASData();
 ?>
 
-    <div class="wrap">
-        <h2><?php echo __('WP Author Security Settings', 'wp-author-security'); ?></h2>
+<div class="wrap">
+    <h2><?php echo __('WP Author Security Settings', 'wp-author-security'); ?></h2>
+    <p style="font-style: italic;">
+        <?php echo sprintf( __( 'Blocked %d malicious requests since activation and %d requests in the past 7 days.', 'wp-author-security' ),
+            $wpasMeta->getCountAll(),
+            $wpasMeta->getCountLastDays()
+        );
+        ?>
+    </p>
     <form method="post" action="options.php">
     <?php settings_fields( 'wp-author-security-group' ); ?>
     <?php do_settings_sections( 'wp-author-security-group' ); ?>
@@ -212,7 +220,7 @@ function wp_author_security_options_page() {
     
     <?php submit_button(); ?>
 
-</form>
+    </form>
 </div>
 <?php
 }

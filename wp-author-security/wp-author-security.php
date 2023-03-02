@@ -6,22 +6,25 @@
  * Description: Protect against user enumeration attacks on author pages and other places where valid user names can be obtained.
  * Author: mgmsp
  * Author URI: https://www.mgm-sp.com
- * Version: 1.4.1
+ * Version: 1.5.0
  * License: GPLv3
  * Plugin URI: https://github.com/mgm-sp/wp-author-security
  */
+
+use WP_Author_Security\WPASData;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
+require_once (dirname( __FILE__ ) . '/WPASData.php');
 require_once (dirname( __FILE__ ) . '/options.php');
 
 /**
  * initialize the plugin
  */
 function wpas_init() {
+
     add_action( 'template_redirect', 'wpas_check_author_request', 1 );
     add_action( 'rest_api_init', 'wpas_check_rest_api', 10 );
     add_action( 'plugins_loaded', 'wpas_load_plugin_textdomain' );
@@ -31,7 +34,10 @@ function wpas_init() {
     add_filter( 'oembed_response_data', 'wpas_filter_oembed', 10, 4 );
     // since wp 5.5
     add_filter( 'wp_sitemaps_add_provider', 'wpas_filter_wp_sitemap_author', 10, 2 );
-    
+
+    register_activation_hook( __FILE__, ['WP_Author_Security\WPASData', 'createDB'] );
+    register_uninstall_hook( __FILE__, ['WP_Author_Security\WPASData', 'uninstall'] );
+    add_action( 'plugins_loaded', ['WP_Author_Security\WPASData', 'updateDbCheck'] );
 }
 
 /**
@@ -71,6 +77,7 @@ function wpas_check_author_request() {
     
     // when protection is enabled display 404
     if( $disable ) {
+        wpas_incrementStatistics(WPASData::TYPE_AUTHOR_REQUEST);
         wpas_display_404();  
     }
 
@@ -90,6 +97,7 @@ function wpas_check_rest_api()
     $requestUriMatch = (isset($_SERVER['REQUEST_URI']) && preg_match($pattern, $_SERVER['REQUEST_URI']));
     if( $restRouteMatch || $requestUriMatch ) {
         if(get_option( 'disableRestUser' )) {
+            wpas_incrementStatistics(WPASData::TYPE_REST_API_USER);
             wpas_display_404();
         }        
     }    
@@ -160,6 +168,7 @@ function wpas_login_error_message($error){
 		     in_array( 'incorrect_password', $err_codes ) ) {
 			//its the right error so we can overwrite it
 			$error = sprintf( __( 'The entered username or password is not correct. <a href=%s>Lost your password</a>?', 'wp-author-security' ), wp_lostpassword_url() );
+            wpas_incrementStatistics(WPASData::TYPE_LOGIN_PWRESET);
 		}
 	}
     
@@ -180,8 +189,10 @@ function wpas_check_lost_password_error($errors) {
     
     if( is_wp_error( $errors ) ) {
         if( $errors->get_error_code() === 'invalidcombo' || $errors->get_error_code() === 'invalid_email' ) {
+            wpas_incrementStatistics(WPASData::TYPE_LOGIN_PWRESET);
             $redirect = 'wp-login.php?checkemail=confirm';
             wp_safe_redirect($redirect);
+            exit();
         }
     }
     return;
@@ -198,8 +209,9 @@ function wpas_filter_feed($displayName) {
     if( !get_option( 'wpas_filterFeed') || !wpas_is_enabled_for_logged_in() ) {
         return $displayName;
     }
-
+    
     if ( is_feed() ) {
+        wpas_incrementStatistics(WPASData::TYPE_FEED);
         return '';
 	} 
 
@@ -224,6 +236,7 @@ function wpas_filter_oembed( $data, $post, $width, $height ) {
 
     unset($data['author_name']);
     unset($data['author_url']);
+    wpas_incrementStatistics(WPASData::TYPE_OEMBED);
     
     return $data;
 };
@@ -241,6 +254,8 @@ function wpas_filter_wp_sitemap_author( $provider, $name ) {
     }
 
     if ( 'users' === $name ) {
+        // currently disabled as this hook fires almost on every request
+        // wpas_incrementStatistics(WPASData::TYPE_SITEMAP_AUTHOR);
         return false;
     }
 
@@ -261,6 +276,31 @@ function wpas_is_enabled_for_logged_in() {
 
 function wpas_load_plugin_textdomain() {
     load_plugin_textdomain( 'wp-author-security', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+}
+
+function wpas_incrementStatistics($type) {
+    $wpasMeta = new WPASData();
+    $wpasMeta->cleanUp();
+    $wpasMeta->addOrUpdate(WPASData::TYPE_GENERAL, WPASData::KEY_ALL_COUNT);
+
+    $lastAction = $wpasMeta->getMeta(WPASData::TYPE_GENERAL, WPASData::KEY_LAST_ACTION);
+    $time = date("Y-m-d H:i:s");
+    $currentWeekDay = date("N");
+    if(empty($lastAction)) {
+        $wpasMeta->addMeta(WPASData::TYPE_GENERAL, WPASData::KEY_LAST_ACTION, $time);
+        $lastAction = $time;
+    } else {
+        $wpasMeta->updateMeta(WPASData::TYPE_GENERAL, WPASData::KEY_LAST_ACTION, $time);
+    }
+
+    $oldDate = new \DateTime($lastAction);
+    if($oldDate->format("N") !== $currentWeekDay) {
+        // reset count because we have a new day
+        $wpasMeta->addOrUpdate(WPASData::TYPE_GENERAL, 'weekday_' . $currentWeekDay, 1);
+    } else {
+        // otherwise increment count for day
+        $wpasMeta->addOrUpdate(WPASData::TYPE_GENERAL, 'weekday_' . $currentWeekDay);
+    }
 }
 
 wpas_init();
